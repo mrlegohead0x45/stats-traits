@@ -99,7 +99,15 @@
 <span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
-</pre><pre class="rust"><code><span class="kw">use </span>std::{iter::Sum, ops::Div};
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Library for calculating statistics on collections of numbers.
+
+</span><span class="kw">use </span>std::{iter::Sum, ops::Div};
 
 <span class="doccomment">/// A trait to be implemented for collection-like types
 /// that provides statistical methods. Requires that the
@@ -107,7 +115,7 @@
 /// [`Iterator`].
 </span><span class="kw">pub trait </span>Stats: IntoIterator + Clone {
     <span class="doccomment">/// Calculate the sum of all the items in the collection
-    /// 
+    ///
     /// # Example
     /// ```
     /// use stats::Stats;
@@ -125,7 +133,7 @@
     }
 
     <span class="doccomment">/// Count the items in the collection
-    /// 
+    ///
     /// # Example
     /// ```
     /// use stats::Stats;
@@ -136,7 +144,7 @@
     }
 
     <span class="doccomment">/// Find the mean of the collection
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use stats::Stats;
@@ -152,7 +160,7 @@
     /// use stats::Stats;
     /// assert_eq!(vec![1, 2, 3, 4].mean(), 2);
     /// ```
-    /// 
+    ///
     /// # Panics
     /// Panics if the collection is empty (has a length of 0).
     /// ```
@@ -161,6 +169,7 @@
     /// # let res = std::panic::catch_unwind(|| {
     /// v.mean(); // panics
     /// # });
+    /// # assert!(res.is_err());
     /// ```
     </span><span class="kw">fn </span>mean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item
     <span class="kw">where
@@ -172,7 +181,7 @@
     <span class="doccomment">/// Like [`Stats::mean`], but returns `None` if the collection is empty.
     /// The [`Stats::mean`] method will panic if the collection is empty.
     /// The same caveat about integer division applies.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use stats::Stats;
@@ -199,6 +208,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; Stats <span class="kw">for </span>Vec&lt;T&gt; <span class="kw">where </span>T: Clone {}
+<span class="doccomment">/// Blanket implementation for all types that implement IntoIterator and Clone.
+/// This allows us to use the methods on any type that implements those traits.
+/// For example, we can use the methods on [`Vec`] and `&amp;[i32]`.
+</span><span class="kw">impl</span>&lt;T&gt; Stats <span class="kw">for </span>T <span class="kw">where </span>T: IntoIterator + Clone {}
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="stats" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
