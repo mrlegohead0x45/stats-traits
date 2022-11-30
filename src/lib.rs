@@ -6,7 +6,7 @@ use std::{iter::Sum, ops::Div};
 /// [`Iterator`].
 pub trait Stats: IntoIterator + Clone {
     /// Calculate the sum of all the items in the collection
-    /// 
+    ///
     /// # Example
     /// ```
     /// use stats::Stats;
@@ -24,7 +24,7 @@ pub trait Stats: IntoIterator + Clone {
     }
 
     /// Count the items in the collection
-    /// 
+    ///
     /// # Example
     /// ```
     /// use stats::Stats;
@@ -35,21 +35,67 @@ pub trait Stats: IntoIterator + Clone {
     }
 
     /// Find the mean of the collection
-    /// 
-    /// # Example
+    ///
+    /// # Examples
     /// ```
     /// use stats::Stats;
     /// assert_eq!(vec![1, 2, 3].mean(), 2);
     /// ```
     /// ```
     /// use stats::Stats;
-    /// assert_eq!(vec![1.0, 2.0, 3.0].mean(), 2.0);
+    /// let v: Vec<f64> = vec![1.0, 2.0, 3.0];
+    /// assert_eq!(v.mean(), 2.0);
+    /// ```
+    /// Watch out for integer division!
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(vec![1, 2, 3, 4].mean(), 2);
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the collection is empty (has a length of 0).
+    /// ```
+    /// use stats::Stats;
+    /// let v: Vec<i64> = vec![];
+    /// # let res = std::panic::catch_unwind(|| {
+    /// v.mean(); // panics
+    /// # });
+    /// # assert!(res.is_err());
     /// ```
     fn mean(&self) -> Self::Item
     where
         Self::Item: Sum + From<usize> + Div<Self::Item, Output = Self::Item>,
     {
         self.sum() / self.count().into()
+    }
+
+    /// Like [`Stats::mean`], but returns `None` if the collection is empty.
+    /// The [`Stats::mean`] method will panic if the collection is empty.
+    /// The same caveat about integer division applies.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(vec![1, 2, 3].checked_mean(), Some(2));
+    /// ```
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(Vec::<i32>::new().checked_mean(), None);
+    /// ```
+    /// ```
+    /// use stats::Stats;
+    /// let v: Vec<f64> = vec![1.0, 2.0, 3.0];
+    /// assert_eq!(v.checked_mean(), Some(2.0));
+    /// ```
+    fn checked_mean(&self) -> Option<Self::Item>
+    where
+        Self::Item: Sum + From<usize> + Div<Self::Item, Output = Self::Item>,
+    {
+        if self.count() == 0 {
+            None
+        } else {
+            Some(self.mean())
+        }
     }
 }
 
