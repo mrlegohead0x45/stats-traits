@@ -1,3 +1,5 @@
+//! Library for calculating statistics on collections of numbers.
+
 use std::{iter::Sum, ops::Div};
 
 /// A trait to be implemented for collection-like types
@@ -99,4 +101,7 @@ pub trait Stats: IntoIterator + Clone {
     }
 }
 
-impl<T> Stats for Vec<T> where T: Clone {}
+/// Blanket implementation for all types that implement IntoIterator and Clone.
+/// This allows us to use the methods on any type that implements those traits.
+/// For example, we can use the methods on [`Vec`] and `&[i32]`.
+impl<T> Stats for T where T: IntoIterator + Clone {}

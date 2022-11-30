@@ -1,0 +1,36 @@
+name: Build & publish docs
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  docs:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: rustup toolchain install stable --profile minimal
+
+      - uses: Swatinem/rust-cache@v2
+
+      - shell: pwsh
+        run: cargo doc --document-private-items --no-deps
+
+      - shell: pwsh
+        run: |
+          git checkout gh-pages
+          Move-Item -Path target/doc/* -Destination . -Force
+
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Rebuilt docs"
+          git push
