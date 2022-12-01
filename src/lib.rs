@@ -114,3 +114,54 @@ pub trait Stats: IntoIterator + Clone {
 /// This allows us to use the methods on any type that implements those traits.
 /// For example, we can use the methods on [`Vec`] and `&[i32]`.
 impl<T> Stats for T where T: IntoIterator + Clone {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sum_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(v.sum(), 6);
+
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.sum(), 6.0);
+    }
+
+    #[test]
+    fn test_count_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(v.count(), 3);
+    }
+
+    #[test]
+    fn test_mean_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(v.mean(), 2);
+
+        let v: Vec<f64> = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.mean(), 2.0);
+
+        let v = vec![1, 2, 3, 4];
+        assert_eq!(v.mean(), 2);
+    }
+
+    #[test]
+    fn test_checked_mean_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(v.checked_mean(), Some(2));
+
+        let v = Vec::<i32>::new();
+        assert_eq!(v.checked_mean(), None);
+
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.checked_mean(), Some(2.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_mean_panic() {
+        let v = Vec::<i64>::new();
+        v.mean();
+    }
+}
