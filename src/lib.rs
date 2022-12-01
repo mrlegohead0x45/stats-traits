@@ -1,5 +1,7 @@
 //! Library for calculating statistics on collections of numbers.
 
+#![warn(missing_docs)]
+
 use std::{iter::Sum, ops::Div};
 
 /// A trait to be implemented for collection-like types
@@ -64,15 +66,22 @@ pub trait Stats: IntoIterator + Clone {
     /// # });
     /// # assert!(res.is_err());
     /// ```
+    /// Will also panic if the length of the collection is too large
+    /// to fit in [`Self::Item`](IntoIterator::Item).
     fn mean(&self) -> Self::Item
     where
-        Self::Item: Sum + From<usize> + Div<Self::Item, Output = Self::Item>,
+        Self::Item: Sum + TryFrom<usize> + Div<Self::Item, Output = Self::Item>,
     {
-        self.sum() / self.count().into()
+        self.sum()
+            / match self.count().try_into() {
+                Ok(v) => v,
+                Err(_) => panic!("Cannot convert count to item type"),
+            }
     }
 
-    /// Like [`Stats::mean`], but returns `None` if the collection is empty.
-    /// The [`Stats::mean`] method will panic if the collection is empty.
+    /// Like [`Stats::mean`], but returns `None` if the collection is empty,
+    /// or if the length of the collection is too large to fit in [`Self::Item`](IntoIterator::Item),
+    /// whereas [`Stats::mean`] method will panic in these cases.
     /// The same caveat about integer division applies.
     ///
     /// # Examples
@@ -91,9 +100,9 @@ pub trait Stats: IntoIterator + Clone {
     /// ```
     fn checked_mean(&self) -> Option<Self::Item>
     where
-        Self::Item: Sum + From<usize> + Div<Self::Item, Output = Self::Item>,
+        Self::Item: Sum + TryFrom<usize> + Div<Self::Item, Output = Self::Item>,
     {
-        if self.count() == 0 {
+        if self.count() == 0 || <usize as TryInto<Self::Item>>::try_into(self.count()).is_err() {
             None
         } else {
             Some(self.mean())
@@ -101,7 +110,7 @@ pub trait Stats: IntoIterator + Clone {
     }
 }
 
-/// Blanket implementation for all types that implement IntoIterator and Clone.
+/// Blanket implementation for all types that implement [`IntoIterator`] and [`Clone`].
 /// This allows us to use the methods on any type that implements those traits.
 /// For example, we can use the methods on [`Vec`] and `&[i32]`.
 impl<T> Stats for T where T: IntoIterator + Clone {}
