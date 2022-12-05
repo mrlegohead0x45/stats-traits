@@ -40,6 +40,21 @@ pub trait Stats: IntoIterator + Clone {
         self.clone().into_iter().count()
     }
 
+    /// Return the length of the collection as a [`Self::Item`].
+    /// Will panic if the length is greater than the maximum value
+    /// of the type.
+    ///
+    /// [`Self::Item`]: IntoIterator::Item
+    fn panicking_count(&self) -> Self::Item
+    where
+        Self::Item: FromPrimitive,
+    {
+        match Self::Item::from_usize(self.count()) {
+            Some(count) => count,
+            None => panic!("Could not convert usize to Self::Item"),
+        }
+    }
+
     /// Find the mean of the collection
     ///
     /// # Examples
@@ -74,11 +89,7 @@ pub trait Stats: IntoIterator + Clone {
     where
         Self::Item: Sum + FromPrimitive + Div<Self::Item, Output = Self::Item>,
     {
-        self.sum()
-            / match Self::Item::from_usize(self.count()) {
-                Some(v) => v,
-                None => panic!("Cannot convert count to item type"),
-            }
+        self.sum() / self.panicking_count()
     }
 
     /// Like [`Stats::mean`], but returns `None` if the collection is empty,
@@ -165,5 +176,13 @@ mod tests {
     fn test_mean_panic() {
         let v = Vec::<i64>::new();
         v.mean();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_panicking_count() {
+        // i8 can hold [-127, 127]
+        let v: Vec<i8> = Vec::from_iter(std::iter::repeat(0).take(128));
+        v.panicking_count();
     }
 }
