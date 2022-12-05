@@ -167,13 +167,70 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Library for calculating statistics on collections of numbers.
 
 </span><span class="attribute">#![warn(missing_docs)]
+#![no_std]
 
-</span><span class="kw">use </span>std::{iter::Sum, ops::Div};
+</span><span class="kw">use </span>core::{iter::Sum, ops::Div};
 
-<span class="kw">use </span>num_traits::FromPrimitive;
+<span class="kw">use </span>num_traits::{FromPrimitive, Num};
 
 <span class="doccomment">/// A trait to be implemented for collection-like types
 /// that provides statistical methods. Requires that the
@@ -191,6 +248,7 @@
     /// use stats::Stats;
     /// assert_eq!(vec![1.0, 2.0, 3.0].sum(), 6.0);
     /// ```
+    </span><span class="attribute">#[inline]
     </span><span class="kw">fn </span>sum(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item
     <span class="kw">where
         </span><span class="self">Self</span>::Item: Sum,
@@ -205,8 +263,25 @@
     /// use stats::Stats;
     /// assert_eq!(vec![1, 2, 3].count(), 3);
     /// ```
+    </span><span class="attribute">#[inline]
     </span><span class="kw">fn </span>count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.clone().into_iter().count()
+    }
+
+    <span class="doccomment">/// Return the length of the collection as a [`Self::Item`].
+    /// Will panic if the length is greater than the maximum value
+    /// of the type.
+    ///
+    /// [`Self::Item`]: IntoIterator::Item
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>panicking_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item
+    <span class="kw">where
+        </span><span class="self">Self</span>::Item: FromPrimitive,
+    {
+        <span class="kw">match </span><span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.count()) {
+            <span class="prelude-val">Some</span>(count) =&gt; count,
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Could not convert usize to Self::Item&quot;</span>),
+        }
     }
 
     <span class="doccomment">/// Find the mean of the collection
@@ -243,11 +318,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>::Item: Sum + FromPrimitive + Div&lt;<span class="self">Self</span>::Item, Output = <span class="self">Self</span>::Item&gt;,
     {
-        <span class="self">self</span>.sum()
-            / <span class="kw">match </span><span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.count()) {
-                <span class="prelude-val">Some</span>(v) =&gt; v,
-                <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Cannot convert count to item type&quot;</span>),
-            }
+        <span class="self">self</span>.sum() / <span class="self">self</span>.panicking_count()
     }
 
     <span class="doccomment">/// Like [`Stats::mean`], but returns `None` if the collection is empty,
@@ -279,16 +350,49 @@
             <span class="prelude-val">Some</span>(<span class="self">self</span>.mean())
         }
     }
+
+    <span class="doccomment">/// Find the variance of the collection.
+    /// The variance is the sum of the squared differences between each item
+    /// and the mean, divided by the number of items in the collection.
+    /// The variance is a measure of how spread out the items are.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(vec![1.0, 2.0, 3.0].variance(), 2.0 / 3.0);
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the collection is empty (has a length of 0).
+    /// Will also panic if the length of the collection is too large
+    /// to fit in [`Self::Item`](IntoIterator::Item).
+    ///
+    /// [Wikipedia](&lt;https://en.wikipedia.org/wiki/Variance&gt;)
+    </span><span class="kw">fn </span>variance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item
+    <span class="kw">where
+        </span><span class="self">Self</span>::Item: Num + Sum + FromPrimitive + Copy,
+    {
+        <span class="kw">let </span>mean = <span class="self">self</span>.mean();
+        <span class="self">self</span>.clone()
+            .into_iter()
+            .map(|x| (x - mean) * (x - mean))
+            .sum::&lt;<span class="self">Self</span>::Item&gt;()
+            / <span class="self">self</span>.panicking_count()
+    }
 }
 
-<span class="doccomment">/// Blanket implementation for all types that implement [`IntoIterator`] and [`Clone`].
+<span class="doccomment">/// Blanket implementation for all types that implement [`IntoIterator`] and [`Copy`].
 /// This allows us to use the methods on any type that implements those traits.
-/// For example, we can use the methods on [`Vec`] and `&amp;[i32]`.
+/// For example, we can use the methods on `Vec` and `&amp;[i32]`.
 </span><span class="kw">impl</span>&lt;T&gt; Stats <span class="kw">for </span>T <span class="kw">where </span>T: IntoIterator + Clone {}
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+
+    <span class="kw">extern crate </span>std;
+    <span class="kw">use </span>std::prelude::rust_2021::<span class="kw-2">*</span>;
+    <span class="kw">use </span>std::vec;
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_sum_vec() {
@@ -334,6 +438,14 @@
     </span><span class="kw">fn </span>test_mean_panic() {
         <span class="kw">let </span>v = Vec::&lt;i64&gt;::new();
         v.mean();
+    }
+
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>test_panicking_count() {
+        <span class="comment">// i8 can hold [-127, 127]
+        </span><span class="kw">let </span>v: Vec&lt;i8&gt; = Vec::from_iter(std::iter::repeat(<span class="number">0</span>).take(<span class="number">128</span>));
+        v.panicking_count();
     }
 }
 </code></pre></div>
