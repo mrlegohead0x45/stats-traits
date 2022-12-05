@@ -1,10 +1,11 @@
 //! Library for calculating statistics on collections of numbers.
 
 #![warn(missing_docs)]
+#![no_std]
 
-use std::{iter::Sum, ops::Div};
+use core::{iter::Sum, ops::Div};
 
-use num_traits::FromPrimitive;
+use num_traits::{FromPrimitive, Num};
 
 /// A trait to be implemented for collection-like types
 /// that provides statistical methods. Requires that the
@@ -22,6 +23,7 @@ pub trait Stats: IntoIterator + Clone {
     /// use stats::Stats;
     /// assert_eq!(vec![1.0, 2.0, 3.0].sum(), 6.0);
     /// ```
+    #[inline]
     fn sum(&self) -> Self::Item
     where
         Self::Item: Sum,
@@ -36,6 +38,7 @@ pub trait Stats: IntoIterator + Clone {
     /// use stats::Stats;
     /// assert_eq!(vec![1, 2, 3].count(), 3);
     /// ```
+    #[inline]
     fn count(&self) -> usize {
         self.clone().into_iter().count()
     }
@@ -45,6 +48,7 @@ pub trait Stats: IntoIterator + Clone {
     /// of the type.
     ///
     /// [`Self::Item`]: IntoIterator::Item
+    #[inline]
     fn panicking_count(&self) -> Self::Item
     where
         Self::Item: FromPrimitive,
@@ -121,16 +125,49 @@ pub trait Stats: IntoIterator + Clone {
             Some(self.mean())
         }
     }
+
+    /// Find the variance of the collection.
+    /// The variance is the sum of the squared differences between each item
+    /// and the mean, divided by the number of items in the collection.
+    /// The variance is a measure of how spread out the items are.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(vec![1.0, 2.0, 3.0].variance(), 2.0 / 3.0);
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if the collection is empty (has a length of 0).
+    /// Will also panic if the length of the collection is too large
+    /// to fit in [`Self::Item`](IntoIterator::Item).
+    ///
+    /// [Wikipedia](<https://en.wikipedia.org/wiki/Variance>)
+    fn variance(&self) -> Self::Item
+    where
+        Self::Item: Num + Sum + FromPrimitive + Copy,
+    {
+        let mean = self.mean();
+        self.clone()
+            .into_iter()
+            .map(|x| (x - mean) * (x - mean))
+            .sum::<Self::Item>()
+            / self.panicking_count()
+    }
 }
 
-/// Blanket implementation for all types that implement [`IntoIterator`] and [`Clone`].
+/// Blanket implementation for all types that implement [`IntoIterator`] and [`Copy`].
 /// This allows us to use the methods on any type that implements those traits.
-/// For example, we can use the methods on [`Vec`] and `&[i32]`.
+/// For example, we can use the methods on `Vec` and `&[i32]`.
 impl<T> Stats for T where T: IntoIterator + Clone {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    extern crate std;
+    use std::prelude::rust_2021::*;
+    use std::vec;
 
     #[test]
     fn test_sum_vec() {
