@@ -4,6 +4,8 @@
 
 use std::{iter::Sum, ops::Div};
 
+use num_traits::FromPrimitive;
+
 /// A trait to be implemented for collection-like types
 /// that provides statistical methods. Requires that the
 /// type it is implemented on can be converted into an
@@ -70,12 +72,12 @@ pub trait Stats: IntoIterator + Clone {
     /// to fit in [`Self::Item`](IntoIterator::Item).
     fn mean(&self) -> Self::Item
     where
-        Self::Item: Sum + TryFrom<usize> + Div<Self::Item, Output = Self::Item>,
+        Self::Item: Sum + FromPrimitive + Div<Self::Item, Output = Self::Item>,
     {
         self.sum()
-            / match self.count().try_into() {
-                Ok(v) => v,
-                Err(_) => panic!("Cannot convert count to item type"),
+            / match Self::Item::from_usize(self.count()) {
+                Some(v) => v,
+                None => panic!("Cannot convert count to item type"),
             }
     }
 
@@ -100,9 +102,9 @@ pub trait Stats: IntoIterator + Clone {
     /// ```
     fn checked_mean(&self) -> Option<Self::Item>
     where
-        Self::Item: Sum + TryFrom<usize> + Div<Self::Item, Output = Self::Item>,
+        Self::Item: Sum + FromPrimitive + Div<Self::Item, Output = Self::Item>,
     {
-        if self.count() == 0 || <usize as TryInto<Self::Item>>::try_into(self.count()).is_err() {
+        if self.count() == 0 || Self::Item::from_usize(self.count()).is_none() {
             None
         } else {
             Some(self.mean())
