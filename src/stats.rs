@@ -1,4 +1,4 @@
-use num_traits::FromPrimitive;
+use num_traits::{FromPrimitive, ToPrimitive};
 
 use crate::NumExt;
 
@@ -158,6 +158,32 @@ where
             Some(self.variance())
         }
     }
+
+    /// Find the standard deviation of the collection.
+    /// The standard deviation is the square root of the variance.
+    /// The standard deviation is a measure of how spread out the items are.
+    /// It is the square root of the average of the squared differences from the mean.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// use approx::assert_relative_eq;
+    /// assert_relative_eq!(vec![1.0, 2.0, 3.0].std_dev(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
+    /// ```
+    ///
+    /// # Panics
+    /// Panics under the same conditions as [`Stats::variance`].
+    /// Also panics if the variance cannot be converted to `f64`.
+    fn std_dev(&self) -> Self::Item
+    where
+        Self::Item: ToPrimitive,
+    {
+        Self::Item::from_f64(match self.variance().to_f64() {
+            Some(x) => x.sqrt(),
+            None => panic!("Cannot convert variance to f64"),
+        })
+        .unwrap()
+    }
 }
 
 /// Blanket implementation for all types that implement [`IntoIterator`] and [`Copy`].
@@ -177,6 +203,8 @@ mod tests {
     extern crate std;
     use std::prelude::rust_2021::*;
     use std::vec;
+
+    use approx::assert_relative_eq;
 
     #[test]
     fn test_sum_vec() {
@@ -252,5 +280,18 @@ mod tests {
 
         let v = Vec::<i32>::new();
         assert_eq!(v.checked_variance(), None);
+    }
+
+    #[test]
+    fn test_std_dev_vec() {
+        let v = vec![1.0, 2.0, 3.0];
+        assert_relative_eq!(v.std_dev(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_std_dev_panic() {
+        let v = Vec::<i64>::new();
+        v.std_dev();
     }
 }
