@@ -211,6 +211,49 @@
 <span id="211">211</span>
 <span id="212">212</span>
 <span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::FromPrimitive;
 
 <span class="kw">use </span><span class="kw">crate</span>::NumExt;
@@ -350,6 +393,27 @@
             .sum::&lt;<span class="self">Self</span>::Item&gt;()
             / <span class="self">self</span>.panicking_count()
     }
+
+    <span class="doccomment">/// Like [`Stats::variance`], but returns `None` if the collection is empty,
+    /// or if the length of the collection is too large to fit in [`Self::Item`](IntoIterator::Item),
+    /// whereas [`Stats::variance`] method will panic in these cases.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(vec![1.0, 2.0, 3.0].checked_variance(), Some(2.0 / 3.0));
+    /// ```
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(Vec::&lt;i32&gt;::new().checked_variance(), None);
+    /// ```
+    </span><span class="kw">fn </span>checked_variance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if </span><span class="self">self</span>.count() == <span class="number">0 </span>|| <span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.count()).is_none() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.variance())
+        }
+    }
 }
 
 <span class="doccomment">/// Blanket implementation for all types that implement [`IntoIterator`] and [`Copy`].
@@ -422,6 +486,28 @@
         <span class="comment">// i8 can hold [-127, 127]
         </span><span class="kw">let </span>v: Vec&lt;i8&gt; = Vec::from_iter(std::iter::repeat(<span class="number">0</span>).take(<span class="number">128</span>));
         v.panicking_count();
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_variance_vec() {
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
+        <span class="macro">assert_eq!</span>(v.variance(), <span class="number">2.0 </span>/ <span class="number">3.0</span>);
+    }
+
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>test_variance_panic() {
+        <span class="kw">let </span>v = Vec::&lt;i64&gt;::new();
+        v.variance();
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_checked_variance_vec() {
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
+        <span class="macro">assert_eq!</span>(v.checked_variance(), <span class="prelude-val">Some</span>(<span class="number">2.0 </span>/ <span class="number">3.0</span>));
+
+        <span class="kw">let </span>v = Vec::&lt;i32&gt;::new();
+        <span class="macro">assert_eq!</span>(v.checked_variance(), <span class="prelude-val">None</span>);
     }
 }
 </code></pre></div>
