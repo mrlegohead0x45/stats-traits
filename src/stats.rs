@@ -137,6 +137,27 @@ where
             .sum::<Self::Item>()
             / self.panicking_count()
     }
+
+    /// Like [`Stats::variance`], but returns `None` if the collection is empty,
+    /// or if the length of the collection is too large to fit in [`Self::Item`](IntoIterator::Item),
+    /// whereas [`Stats::variance`] method will panic in these cases.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(vec![1.0, 2.0, 3.0].checked_variance(), Some(2.0 / 3.0));
+    /// ```
+    /// ```
+    /// use stats::Stats;
+    /// assert_eq!(Vec::<i32>::new().checked_variance(), None);
+    /// ```
+    fn checked_variance(&self) -> Option<Self::Item> {
+        if self.count() == 0 || Self::Item::from_usize(self.count()).is_none() {
+            None
+        } else {
+            Some(self.variance())
+        }
+    }
 }
 
 /// Blanket implementation for all types that implement [`IntoIterator`] and [`Copy`].
@@ -209,5 +230,27 @@ mod tests {
         // i8 can hold [-127, 127]
         let v: Vec<i8> = Vec::from_iter(std::iter::repeat(0).take(128));
         v.panicking_count();
+    }
+
+    #[test]
+    fn test_variance_vec() {
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.variance(), 2.0 / 3.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_variance_panic() {
+        let v = Vec::<i64>::new();
+        v.variance();
+    }
+
+    #[test]
+    fn test_checked_variance_vec() {
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.checked_variance(), Some(2.0 / 3.0));
+
+        let v = Vec::<i32>::new();
+        assert_eq!(v.checked_variance(), None);
     }
 }
