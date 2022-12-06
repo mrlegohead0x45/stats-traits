@@ -254,7 +254,48 @@
 <span id="254">254</span>
 <span id="255">255</span>
 <span id="256">256</span>
-</pre><pre class="rust"><code><span class="kw">use </span>num_traits::FromPrimitive;
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+</pre><pre class="rust"><code><span class="kw">use </span>num_traits::{FromPrimitive, ToPrimitive};
 
 <span class="kw">use </span><span class="kw">crate</span>::NumExt;
 
@@ -414,6 +455,32 @@
             <span class="prelude-val">Some</span>(<span class="self">self</span>.variance())
         }
     }
+
+    <span class="doccomment">/// Find the standard deviation of the collection.
+    /// The standard deviation is the square root of the variance.
+    /// The standard deviation is a measure of how spread out the items are.
+    /// It is the square root of the average of the squared differences from the mean.
+    ///
+    /// # Examples
+    /// ```
+    /// use stats::Stats;
+    /// use approx::assert_relative_eq;
+    /// assert_relative_eq!(vec![1.0, 2.0, 3.0].std_dev(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
+    /// ```
+    ///
+    /// # Panics
+    /// Panics under the same conditions as [`Stats::variance`].
+    /// Also panics if the variance cannot be converted to `f64`.
+    </span><span class="kw">fn </span>std_dev(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item
+    <span class="kw">where
+        </span><span class="self">Self</span>::Item: ToPrimitive,
+    {
+        <span class="self">Self</span>::Item::from_f64(<span class="kw">match </span><span class="self">self</span>.variance().to_f64() {
+            <span class="prelude-val">Some</span>(x) =&gt; x.sqrt(),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Cannot convert variance to f64&quot;</span>),
+        })
+        .unwrap()
+    }
 }
 
 <span class="doccomment">/// Blanket implementation for all types that implement [`IntoIterator`] and [`Copy`].
@@ -433,6 +500,8 @@
     <span class="kw">extern crate </span>std;
     <span class="kw">use </span>std::prelude::rust_2021::<span class="kw-2">*</span>;
     <span class="kw">use </span>std::vec;
+
+    <span class="kw">use </span>approx::assert_relative_eq;
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_sum_vec() {
@@ -508,6 +577,19 @@
 
         <span class="kw">let </span>v = Vec::&lt;i32&gt;::new();
         <span class="macro">assert_eq!</span>(v.checked_variance(), <span class="prelude-val">None</span>);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_std_dev_vec() {
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
+        <span class="macro">assert_relative_eq!</span>(v.std_dev(), <span class="number">2.0_f64</span>.sqrt() / <span class="number">3.0_f64</span>.sqrt());
+    }
+
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>test_std_dev_panic() {
+        <span class="kw">let </span>v = Vec::&lt;i64&gt;::new();
+        v.std_dev();
     }
 }
 </code></pre></div>
