@@ -14,6 +14,8 @@
 <span id="14">14</span>
 <span id="15">15</span>
 <span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Library for calculating statistics on collections of numbers.
 
 </span><span class="attribute">#![warn(missing_docs)]
@@ -23,6 +25,7 @@
 
 <span class="kw">use </span>num_traits::{FromPrimitive, Num};
 
+<span class="kw">mod </span>freq;
 <span class="kw">mod </span>stats;
 
 <span class="doccomment">/// Trait for a number-like type that we can calculate statistics on.
@@ -30,5 +33,6 @@
 <span class="kw">impl</span>&lt;T&gt; NumExt <span class="kw">for </span>T <span class="kw">where </span>T: Num + FromPrimitive + Copy + Sum {}
 
 <span class="kw">pub use </span><span class="kw">crate</span>::stats::Stats;
+<span class="kw">pub use </span><span class="kw">crate</span>::freq::FrequencyStats;
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="stats" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
