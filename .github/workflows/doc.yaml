@@ -1,4 +1,4 @@
-name: Build & publish docs
+name: build-docs
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - shell: pwsh
-        run: cargo doc --document-private-items --no-deps
+        run: cargo doc --no-deps
 
       - shell: pwsh
         run: |
