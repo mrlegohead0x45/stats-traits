@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["Stats","A trait to be implemented for collection-like types that provides statistical methods. Requires that the type it is implemented on can be converted into an [`Iterator`]."]]};
