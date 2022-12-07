@@ -237,9 +237,6 @@
 <span id="237">237</span>
 <span id="238">238</span>
 <span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::{FromPrimitive, ToPrimitive};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::DataType;
@@ -300,14 +297,11 @@
     /// or if the length could not be converted to [`Self::Item`]
     ///
     /// [`Self::Item`]: IntoIterator::Item
-    </span><span class="kw">fn </span>non_zero_count_as_item(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">match </span><span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.non_zero_count()<span class="question-mark">?</span>) {
-            <span class="prelude-val">Some</span>(count) =&gt; <span class="prelude-val">Ok</span>(count),
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(StatsError::CouldNotConvert {
-                from: DataType::Usize,
-                to: DataType::Item,
-            }),
-        }
+    </span><span class="kw">fn </span>non_zero_count_into_item(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.non_zero_count()<span class="question-mark">?</span>).ok_or(StatsError::CouldNotConvert {
+            from: DataType::Usize,
+            to: DataType::Item,
+        })
     }
 
     <span class="doccomment">/// Find the mean of the collection
@@ -333,7 +327,7 @@
     /// Will also return an error if the length of the collection is too large
     /// to fit in [`Self::Item`](IntoIterator::Item).
     </span><span class="kw">fn </span>mean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.sum() / <span class="self">self</span>.non_zero_count_as_item()<span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.sum() / <span class="self">self</span>.non_zero_count_into_item()<span class="question-mark">?</span>)
     }
 
     <span class="doccomment">/// Find the variance of the collection.
@@ -349,7 +343,7 @@
     ///
     /// # Errors
     /// Errors under the same conditions as [`Stats::mean`] and
-    /// [`Stats::non_zero_count_as_item`]
+    /// [`Stats::non_zero_count_into_item`]
     ///
     /// [Wikipedia](&lt;https://en.wikipedia.org/wiki/Variance&gt;)
     </span><span class="kw">fn </span>variance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -359,7 +353,7 @@
             .into_iter()
             .map(|x| (x - mean) * (x - mean))
             .sum::&lt;<span class="self">Self</span>::Item&gt;()
-            / <span class="self">self</span>.non_zero_count_as_item()<span class="question-mark">?</span>)
+            / <span class="self">self</span>.non_zero_count_into_item()<span class="question-mark">?</span>)
     }
 
     <span class="doccomment">/// Find the standard deviation of the collection.
@@ -466,7 +460,7 @@
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_non_zero_count_as_item_fail() {
         <span class="macro">assert_eq!</span>(
-            Vec::&lt;i8&gt;::from_iter(std::iter::repeat(<span class="number">1</span>).take(<span class="number">128</span>)).non_zero_count_as_item(),
+            Vec::&lt;i8&gt;::from_iter(std::iter::repeat(<span class="number">1</span>).take(<span class="number">128</span>)).non_zero_count_into_item(),
             <span class="prelude-val">Err</span>(StatsError::CouldNotConvert {
                 from: DataType::Usize,
                 to: DataType::Item
