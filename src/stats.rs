@@ -212,4 +212,31 @@ mod tests {
         let v = vec![1.0, 2.0, 3.0];
         assert_relative_eq!(v.std_dev().unwrap(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
     }
+
+    #[test]
+    fn test_non_zero_count_fail() {
+        assert_eq!(
+            Vec::<i32>::new().non_zero_count(),
+            Err(StatsError::EmptyCollection)
+        )
+    }
+
+    #[test]
+    fn test_non_zero_count_as_item_fail() {
+        assert_eq!(
+            Vec::<i8>::from_iter(std::iter::repeat(1).take(128)).non_zero_count_as_item(),
+            Err(StatsError::CouldNotConvert {
+                from: DataType::Usize,
+                to: DataType::Item
+            })
+        )
+    }
+
+    #[test]
+    fn test_std_dev_vec_fail() {
+        assert_eq!(
+            Vec::<i32>::new().std_dev(),
+            Err(StatsError::EmptyCollection)
+        )
+    }
 }
