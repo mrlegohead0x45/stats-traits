@@ -7,6 +7,7 @@ use core::iter::Sum;
 
 use num_traits::{FromPrimitive, Num};
 
+mod error;
 mod freq;
 mod stats;
 
@@ -14,5 +15,13 @@ mod stats;
 pub trait NumExt: Num + FromPrimitive + Copy + Sum {}
 impl<T> NumExt for T where T: Num + FromPrimitive + Copy + Sum {}
 
-pub use crate::stats::Stats;
+pub use crate::error::StatsError;
 pub use crate::freq::FrequencyStats;
+pub use crate::stats::Stats;
+pub use crate::types::Result;
+
+/// Module with type aliases
+pub mod types {
+    /// Type alias for a [`Result`] with the error type set to [`StatsError`]
+    pub type Result<T> = core::result::Result<T, crate::StatsError>;
+}
