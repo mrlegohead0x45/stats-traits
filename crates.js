@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["stats"];
+window.ALL_CRATES = ["stats_traits"];
