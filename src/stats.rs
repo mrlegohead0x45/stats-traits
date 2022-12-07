@@ -58,14 +58,11 @@ where
     /// or if the length could not be converted to [`Self::Item`]
     ///
     /// [`Self::Item`]: IntoIterator::Item
-    fn non_zero_count_as_item(&self) -> Result<Self::Item> {
-        match Self::Item::from_usize(self.non_zero_count()?) {
-            Some(count) => Ok(count),
-            None => Err(StatsError::CouldNotConvert {
-                from: DataType::Usize,
-                to: DataType::Item,
-            }),
-        }
+    fn non_zero_count_into_item(&self) -> Result<Self::Item> {
+        Self::Item::from_usize(self.non_zero_count()?).ok_or(StatsError::CouldNotConvert {
+            from: DataType::Usize,
+            to: DataType::Item,
+        })
     }
 
     /// Find the mean of the collection
@@ -91,7 +88,7 @@ where
     /// Will also return an error if the length of the collection is too large
     /// to fit in [`Self::Item`](IntoIterator::Item).
     fn mean(&self) -> Result<Self::Item> {
-        Ok(self.sum() / self.non_zero_count_as_item()?)
+        Ok(self.sum() / self.non_zero_count_into_item()?)
     }
 
     /// Find the variance of the collection.
@@ -107,7 +104,7 @@ where
     ///
     /// # Errors
     /// Errors under the same conditions as [`Stats::mean`] and
-    /// [`Stats::non_zero_count_as_item`]
+    /// [`Stats::non_zero_count_into_item`]
     ///
     /// [Wikipedia](<https://en.wikipedia.org/wiki/Variance>)
     fn variance(&self) -> Result<Self::Item> {
@@ -117,7 +114,7 @@ where
             .into_iter()
             .map(|x| (x - mean) * (x - mean))
             .sum::<Self::Item>()
-            / self.non_zero_count_as_item()?)
+            / self.non_zero_count_into_item()?)
     }
 
     /// Find the standard deviation of the collection.
@@ -224,7 +221,7 @@ mod tests {
     #[test]
     fn test_non_zero_count_as_item_fail() {
         assert_eq!(
-            Vec::<i8>::from_iter(std::iter::repeat(1).take(128)).non_zero_count_as_item(),
+            Vec::<i8>::from_iter(std::iter::repeat(1).take(128)).non_zero_count_into_item(),
             Err(StatsError::CouldNotConvert {
                 from: DataType::Usize,
                 to: DataType::Item
