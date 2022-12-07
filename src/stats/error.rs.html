@@ -15,18 +15,32 @@
 <span id="15">15</span>
 <span id="16">16</span>
 <span id="17">17</span>
-</pre><pre class="rust"><code><span class="doccomment">/// Error type for the crate
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Contains types related to error handling in the crate
+
+/// Error type for the crate
 </span><span class="attribute">#[derive(Debug, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>StatsError {
     <span class="doccomment">/// Could not be calculated because the collection was empty
     </span>EmptyCollection,
-    CouldNotConvert {
-        from: DataType,
-        to: DataType,
+    <span class="doccomment">/// Could not convert between data types
+    </span>CouldNotConvert {
+        <span class="doccomment">/// Data type the conversion was attempted from
+        </span>from: DataType,
+        <span class="doccomment">/// Data type the conversion was attempted to
+        </span>to: DataType,
     },
 }
 
-<span class="attribute">#[derive(Debug, PartialEq, Eq)]
+<span class="doccomment">/// Enum for representations of data types the crate might try
+/// and convert between
+</span><span class="attribute">#[derive(Debug, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>DataType {
     Usize,
     F64,
