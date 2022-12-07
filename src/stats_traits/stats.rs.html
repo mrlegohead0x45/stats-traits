@@ -213,6 +213,33 @@
 <span id="213">213</span>
 <span id="214">214</span>
 <span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::{FromPrimitive, ToPrimitive};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::DataType;
@@ -426,6 +453,33 @@
     </span><span class="kw">fn </span>test_std_dev_vec() {
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
         <span class="macro">assert_relative_eq!</span>(v.std_dev().unwrap(), <span class="number">2.0_f64</span>.sqrt() / <span class="number">3.0_f64</span>.sqrt());
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_non_zero_count_fail() {
+        <span class="macro">assert_eq!</span>(
+            Vec::&lt;i32&gt;::new().non_zero_count(),
+            <span class="prelude-val">Err</span>(StatsError::EmptyCollection)
+        )
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_non_zero_count_as_item_fail() {
+        <span class="macro">assert_eq!</span>(
+            Vec::&lt;i8&gt;::from_iter(std::iter::repeat(<span class="number">1</span>).take(<span class="number">128</span>)).non_zero_count_as_item(),
+            <span class="prelude-val">Err</span>(StatsError::CouldNotConvert {
+                from: DataType::Usize,
+                to: DataType::Item
+            })
+        )
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_std_dev_vec_fail() {
+        <span class="macro">assert_eq!</span>(
+            Vec::&lt;i32&gt;::new().std_dev(),
+            <span class="prelude-val">Err</span>(StatsError::EmptyCollection)
+        )
     }
 }
 </code></pre></div>
