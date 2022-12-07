@@ -207,97 +207,12 @@
 <span id="207">207</span>
 <span id="208">208</span>
 <span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
-<span id="232">232</span>
-<span id="233">233</span>
-<span id="234">234</span>
-<span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::{FromPrimitive, ToPrimitive};
 
+<span class="kw">use </span><span class="kw">crate</span>::error::DataType;
 <span class="kw">use </span><span class="kw">crate</span>::NumExt;
+<span class="kw">use </span><span class="kw">crate</span>::Result;
+<span class="kw">use </span><span class="kw">crate</span>::StatsError;
 
 <span class="doccomment">/// A trait to be implemented for collection-like types
 /// that provides statistical methods. Requires that the
@@ -335,16 +250,22 @@
         <span class="self">self</span>.clone().into_iter().count()
     }
 
-    <span class="doccomment">/// Return the length of the collection as a [`Self::Item`].
-    /// Will panic if the length is greater than the maximum value
-    /// of the type.
-    ///
-    /// [`Self::Item`]: IntoIterator::Item
-    </span><span class="attribute">#[inline]
-    </span><span class="kw">fn </span>panicking_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item {
-        <span class="kw">match </span><span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.count()) {
-            <span class="prelude-val">Some</span>(count) =&gt; count,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Could not convert usize to Self::Item&quot;</span>),
+    <span class="kw">fn </span>non_zero_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">let </span>count = <span class="self">self</span>.count();
+        <span class="kw">if </span>count == <span class="number">0 </span>{
+            <span class="prelude-val">Err</span>(StatsError::EmptyCollection)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(count)
+        }
+    }
+
+    <span class="kw">fn </span>non_zero_count_as_item(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">match </span><span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.non_zero_count()<span class="question-mark">?</span>) {
+            <span class="prelude-val">Some</span>(count) =&gt; <span class="prelude-val">Ok</span>(count),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(StatsError::CouldNotConvert {
+                from: DataType::Usize,
+                to: DataType::Item,
+            }),
         }
     }
 
@@ -353,60 +274,25 @@
     /// # Examples
     /// ```
     /// use stats::Stats;
-    /// assert_eq!(vec![1, 2, 3].mean(), 2);
+    /// assert_eq!(vec![1, 2, 3].mean(), Ok(2));
     /// ```
     /// ```
     /// use stats::Stats;
     /// let v: Vec&lt;f64&gt; = vec![1.0, 2.0, 3.0];
-    /// assert_eq!(v.mean(), 2.0);
+    /// assert_eq!(v.mean(), Ok(2.0));
     /// ```
     /// Watch out for integer division!
     /// ```
     /// use stats::Stats;
-    /// assert_eq!(vec![1, 2, 3, 4].mean(), 2);
+    /// assert_eq!(vec![1, 2, 3, 4].mean(), Ok(2));
     /// ```
     ///
-    /// # Panics
-    /// Panics if the collection is empty (has a length of 0).
-    /// ```
-    /// use stats::Stats;
-    /// let v: Vec&lt;i64&gt; = vec![];
-    /// # let res = std::panic::catch_unwind(|| {
-    /// v.mean(); // panics
-    /// # });
-    /// # assert!(res.is_err());
-    /// ```
-    /// Will also panic if the length of the collection is too large
+    /// # Errors
+    /// Returns an error if the collection is empty (has a length of 0).
+    /// Will also return an error if the length of the collection is too large
     /// to fit in [`Self::Item`](IntoIterator::Item).
-    </span><span class="kw">fn </span>mean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item {
-        <span class="self">self</span>.sum() / <span class="self">self</span>.panicking_count()
-    }
-
-    <span class="doccomment">/// Like [`Stats::mean`], but returns `None` if the collection is empty,
-    /// or if the length of the collection is too large to fit in [`Self::Item`](IntoIterator::Item),
-    /// whereas [`Stats::mean`] method will panic in these cases.
-    /// The same caveat about integer division applies.
-    ///
-    /// # Examples
-    /// ```
-    /// use stats::Stats;
-    /// assert_eq!(vec![1, 2, 3].checked_mean(), Some(2));
-    /// ```
-    /// ```
-    /// use stats::Stats;
-    /// assert_eq!(Vec::&lt;i32&gt;::new().checked_mean(), None);
-    /// ```
-    /// ```
-    /// use stats::Stats;
-    /// let v: Vec&lt;f64&gt; = vec![1.0, 2.0, 3.0];
-    /// assert_eq!(v.checked_mean(), Some(2.0));
-    /// ```
-    </span><span class="kw">fn </span>checked_mean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">if </span><span class="self">self</span>.count() == <span class="number">0 </span>|| <span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.count()).is_none() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.mean())
-        }
+    </span><span class="kw">fn </span>mean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.sum() / <span class="self">self</span>.non_zero_count_as_item()<span class="question-mark">?</span>)
     }
 
     <span class="doccomment">/// Find the variance of the collection.
@@ -417,7 +303,7 @@
     /// # Examples
     /// ```
     /// use stats::Stats;
-    /// assert_eq!(vec![1.0, 2.0, 3.0].variance(), 2.0 / 3.0);
+    /// assert_eq!(vec![1.0, 2.0, 3.0].variance(), Ok(2.0 / 3.0));
     /// ```
     ///
     /// # Panics
@@ -426,34 +312,14 @@
     /// to fit in [`Self::Item`](IntoIterator::Item).
     ///
     /// [Wikipedia](&lt;https://en.wikipedia.org/wiki/Variance&gt;)
-    </span><span class="kw">fn </span>variance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item {
-        <span class="kw">let </span>mean = <span class="self">self</span>.mean();
-        <span class="self">self</span>.clone()
+    </span><span class="kw">fn </span>variance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">let </span>mean = <span class="self">self</span>.mean()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self
+            </span>.clone()
             .into_iter()
             .map(|x| (x - mean) * (x - mean))
             .sum::&lt;<span class="self">Self</span>::Item&gt;()
-            / <span class="self">self</span>.panicking_count()
-    }
-
-    <span class="doccomment">/// Like [`Stats::variance`], but returns `None` if the collection is empty,
-    /// or if the length of the collection is too large to fit in [`Self::Item`](IntoIterator::Item),
-    /// whereas [`Stats::variance`] method will panic in these cases.
-    ///
-    /// # Examples
-    /// ```
-    /// use stats::Stats;
-    /// assert_eq!(vec![1.0, 2.0, 3.0].checked_variance(), Some(2.0 / 3.0));
-    /// ```
-    /// ```
-    /// use stats::Stats;
-    /// assert_eq!(Vec::&lt;i32&gt;::new().checked_variance(), None);
-    /// ```
-    </span><span class="kw">fn </span>checked_variance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">if </span><span class="self">self</span>.count() == <span class="number">0 </span>|| <span class="self">Self</span>::Item::from_usize(<span class="self">self</span>.count()).is_none() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.variance())
-        }
+            / <span class="self">self</span>.non_zero_count_as_item()<span class="question-mark">?</span>)
     }
 
     <span class="doccomment">/// Find the standard deviation of the collection.
@@ -465,21 +331,29 @@
     /// ```
     /// use stats::Stats;
     /// use approx::assert_relative_eq;
-    /// assert_relative_eq!(vec![1.0, 2.0, 3.0].std_dev(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
+    /// assert_relative_eq!(vec![1.0, 2.0, 3.0].std_dev().unwrap(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
     /// ```
     ///
     /// # Panics
     /// Panics under the same conditions as [`Stats::variance`].
     /// Also panics if the variance cannot be converted to `f64`.
-    </span><span class="kw">fn </span>std_dev(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Item
+    </span><span class="kw">fn </span>std_dev(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Item: ToPrimitive,
     {
-        <span class="self">Self</span>::Item::from_f64(<span class="kw">match </span><span class="self">self</span>.variance().to_f64() {
+        <span class="self">Self</span>::Item::from_f64(<span class="kw">match </span><span class="self">self</span>.variance()<span class="question-mark">?</span>.to_f64() {
             <span class="prelude-val">Some</span>(x) =&gt; x.sqrt(),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Cannot convert variance to f64&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(StatsError::CouldNotConvert {
+                    from: DataType::Item,
+                    to: DataType::F64,
+                })
+            }
         })
-        .unwrap()
+        .ok_or(StatsError::CouldNotConvert {
+            from: DataType::F64,
+            to: DataType::Item,
+        })
     }
 }
 
@@ -521,75 +395,25 @@
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_mean_vec() {
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-        <span class="macro">assert_eq!</span>(v.mean(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(v.mean(), <span class="prelude-val">Ok</span>(<span class="number">2</span>));
 
         <span class="kw">let </span>v: Vec&lt;f64&gt; = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.mean(), <span class="number">2.0</span>);
+        <span class="macro">assert_eq!</span>(v.mean(), <span class="prelude-val">Ok</span>(<span class="number">2.0</span>));
 
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];
-        <span class="macro">assert_eq!</span>(v.mean(), <span class="number">2</span>);
-    }
-
-    <span class="attribute">#[test]
-    </span><span class="kw">fn </span>test_checked_mean_vec() {
-        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-        <span class="macro">assert_eq!</span>(v.checked_mean(), <span class="prelude-val">Some</span>(<span class="number">2</span>));
-
-        <span class="kw">let </span>v = Vec::&lt;i32&gt;::new();
-        <span class="macro">assert_eq!</span>(v.checked_mean(), <span class="prelude-val">None</span>);
-
-        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.checked_mean(), <span class="prelude-val">Some</span>(<span class="number">2.0</span>));
-    }
-
-    <span class="attribute">#[test]
-    #[should_panic]
-    </span><span class="kw">fn </span>test_mean_panic() {
-        <span class="kw">let </span>v = Vec::&lt;i64&gt;::new();
-        v.mean();
-    }
-
-    <span class="attribute">#[test]
-    #[should_panic]
-    </span><span class="kw">fn </span>test_panicking_count() {
-        <span class="comment">// i8 can hold [-127, 127]
-        </span><span class="kw">let </span>v: Vec&lt;i8&gt; = Vec::from_iter(std::iter::repeat(<span class="number">0</span>).take(<span class="number">128</span>));
-        v.panicking_count();
+        <span class="macro">assert_eq!</span>(v.mean(), <span class="prelude-val">Ok</span>(<span class="number">2</span>));
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_variance_vec() {
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.variance(), <span class="number">2.0 </span>/ <span class="number">3.0</span>);
-    }
-
-    <span class="attribute">#[test]
-    #[should_panic]
-    </span><span class="kw">fn </span>test_variance_panic() {
-        <span class="kw">let </span>v = Vec::&lt;i64&gt;::new();
-        v.variance();
-    }
-
-    <span class="attribute">#[test]
-    </span><span class="kw">fn </span>test_checked_variance_vec() {
-        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.checked_variance(), <span class="prelude-val">Some</span>(<span class="number">2.0 </span>/ <span class="number">3.0</span>));
-
-        <span class="kw">let </span>v = Vec::&lt;i32&gt;::new();
-        <span class="macro">assert_eq!</span>(v.checked_variance(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(v.variance(), <span class="prelude-val">Ok</span>(<span class="number">2.0 </span>/ <span class="number">3.0</span>));
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_std_dev_vec() {
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_relative_eq!</span>(v.std_dev(), <span class="number">2.0_f64</span>.sqrt() / <span class="number">3.0_f64</span>.sqrt());
-    }
-
-    <span class="attribute">#[test]
-    #[should_panic]
-    </span><span class="kw">fn </span>test_std_dev_panic() {
-        <span class="kw">let </span>v = Vec::&lt;i64&gt;::new();
-        v.std_dev();
+        <span class="macro">assert_relative_eq!</span>(v.std_dev().unwrap(), <span class="number">2.0_f64</span>.sqrt() / <span class="number">3.0_f64</span>.sqrt());
     }
 }
 </code></pre></div>
