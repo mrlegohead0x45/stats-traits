@@ -1,6 +1,7 @@
 //! Library for calculating statistics on collections of numbers.
 
 #![warn(missing_docs)]
+#![warn(clippy::cargo)]
 #![no_std]
 
 use core::iter::Sum;

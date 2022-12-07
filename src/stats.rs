@@ -17,11 +17,11 @@ where
     ///
     /// # Example
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// assert_eq!(vec![1, 2, 3].sum(), 6);
     /// ```
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// assert_eq!(vec![1.0, 2.0, 3.0].sum(), 6.0);
     /// ```
     #[inline]
@@ -33,7 +33,7 @@ where
     ///
     /// # Example
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// assert_eq!(vec![1, 2, 3].count(), 3);
     /// ```
     #[inline]
@@ -72,17 +72,17 @@ where
     ///
     /// # Examples
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// assert_eq!(vec![1, 2, 3].mean(), Ok(2));
     /// ```
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// let v: Vec<f64> = vec![1.0, 2.0, 3.0];
     /// assert_eq!(v.mean(), Ok(2.0));
     /// ```
     /// Watch out for integer division!
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// assert_eq!(vec![1, 2, 3, 4].mean(), Ok(2));
     /// ```
     ///
@@ -101,7 +101,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// assert_eq!(vec![1.0, 2.0, 3.0].variance(), Ok(2.0 / 3.0));
     /// ```
     ///
@@ -127,7 +127,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// use stats::Stats;
+    /// use stats_traits::Stats;
     /// use approx::assert_relative_eq;
     /// assert_relative_eq!(vec![1.0, 2.0, 3.0].std_dev().unwrap(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
     /// ```
