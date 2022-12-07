@@ -41,6 +41,8 @@ where
         self.clone().into_iter().count()
     }
 
+    /// Count the items in the collection, returning
+    /// `Err(StatsError::EmptyCollection)` if it's empty
     fn non_zero_count(&self) -> Result<usize> {
         let count = self.count();
         if count == 0 {
@@ -50,6 +52,12 @@ where
         }
     }
 
+    /// Count the items in the collection and convert the result
+    /// to [`Self::Item`]. Return an error
+    /// under the same conditions as [`Stats::non_zero_count`],
+    /// or if the length could not be converted to [`Self::Item`]
+    ///
+    /// [`Self::Item`]: IntoIterator::Item
     fn non_zero_count_as_item(&self) -> Result<Self::Item> {
         match Self::Item::from_usize(self.non_zero_count()?) {
             Some(count) => Ok(count),
@@ -97,10 +105,9 @@ where
     /// assert_eq!(vec![1.0, 2.0, 3.0].variance(), Ok(2.0 / 3.0));
     /// ```
     ///
-    /// # Panics
-    /// Panics if the collection is empty (has a length of 0).
-    /// Will also panic if the length of the collection is too large
-    /// to fit in [`Self::Item`](IntoIterator::Item).
+    /// # Errors
+    /// Errors under the same conditions as [`Stats::mean`] and
+    /// [`Stats::non_zero_count_as_item`]
     ///
     /// [Wikipedia](<https://en.wikipedia.org/wiki/Variance>)
     fn variance(&self) -> Result<Self::Item> {
@@ -125,9 +132,8 @@ where
     /// assert_relative_eq!(vec![1.0, 2.0, 3.0].std_dev().unwrap(), 2.0_f64.sqrt() / 3.0_f64.sqrt());
     /// ```
     ///
-    /// # Panics
-    /// Panics under the same conditions as [`Stats::variance`].
-    /// Also panics if the variance cannot be converted to `f64`.
+    /// # Errors
+    /// Returns an error under the same conditions as [`Stats::variance`]
     fn std_dev(&self) -> Result<Self::Item>
     where
         Self::Item: ToPrimitive,

@@ -22,6 +22,6 @@ pub use crate::types::Result;
 
 /// Module with type aliases
 pub mod types {
-    /// Type alias for a [`Result`] with the error type set to [`StatsError`]
+    /// Type alias for a [`Result`] with the error type set to [`StatsError`](crate::StatsError)
     pub type Result<T> = core::result::Result<T, crate::StatsError>;
 }
