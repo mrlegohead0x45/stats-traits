@@ -1,7 +1,8 @@
 use num_traits::{FromPrimitive, ToPrimitive};
 
 use crate::error::DataType;
-use crate::NumExt;
+use crate::helpers::MinMax;
+use crate::helpers::NumExt;
 use crate::Result;
 use crate::StatsError;
 
@@ -149,6 +150,37 @@ where
             from: DataType::F64,
             to: DataType::Item,
         })
+    }
+
+    /// Return the smallest item in the collection
+    fn min(&self) -> Result<Self::Item>
+    where
+        Self::Item: MinMax,
+    {
+        self.clone()
+            .into_iter()
+            .reduce(Self::Item::min)
+            .ok_or(StatsError::EmptyCollection)
+    }
+
+    /// Return the largest item in the collection
+    fn max(&self) -> Result<Self::Item>
+    where
+        Self::Item: MinMax,
+    {
+        self.clone()
+            .into_iter()
+            .reduce(Self::Item::max)
+            .ok_or(StatsError::EmptyCollection)
+    }
+
+    /// Return the range of the collection
+    /// (the smallest subtracted from the largest)
+    fn range(&self) -> Result<Self::Item>
+    where
+        Self::Item: MinMax,
+    {
+        Ok(self.max()? - self.min()?)
     }
 }
 
