@@ -139,10 +139,47 @@
 <span id="139">139</span>
 <span id="140">140</span>
 <span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::ToPrimitive;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::DataType;
-<span class="kw">use </span><span class="kw">crate</span>::NumExt;
+<span class="kw">use </span><span class="kw">crate</span>::helpers::MinMax;
+<span class="kw">use </span><span class="kw">crate</span>::helpers::NumExt;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 <span class="kw">use </span><span class="kw">crate</span>::StatsError;
 
@@ -271,6 +308,41 @@
             from: DataType::F64,
             to: DataType::Item,
         })
+    }
+
+    <span class="doccomment">/// Return the smallest value in the collection
+    </span><span class="kw">fn </span>min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+    <span class="kw">where
+        </span>T: MinMax,
+    {
+        <span class="self">self</span>.clone()
+            .into_iter()
+            .map(|(<span class="kw">_</span>, val)| val)
+            .reduce(T::min)
+            <span class="comment">// .map_or_else(|| Err(StatsError::EmptyCollection), |(_, val)| Ok(val))
+            </span>.ok_or(StatsError::EmptyCollection)
+    }
+
+    <span class="doccomment">/// Returns the largest value in the collection
+    </span><span class="kw">fn </span>max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+    <span class="kw">where
+        </span>T: MinMax,
+    {
+        <span class="self">self</span>.clone()
+            .into_iter()
+            .map(|(<span class="kw">_</span>, val)| val)
+            .reduce(T::max)
+            <span class="comment">// .map_or_else(|| Err(StatsError::EmptyCollection), |(_, val)| Ok(val))
+            </span>.ok_or(StatsError::EmptyCollection)
+    }
+
+    <span class="doccomment">/// Return the range of the collection
+    /// (the largest - the smallest)
+    </span><span class="kw">fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+    <span class="kw">where
+        </span>T: MinMax,
+    {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.max()<span class="question-mark">? </span>- <span class="self">self</span>.min()<span class="question-mark">?</span>)
     }
 }
 

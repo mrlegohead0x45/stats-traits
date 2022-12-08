@@ -19,30 +19,16 @@
 <span id="19">19</span>
 <span id="20">20</span>
 <span id="21">21</span>
-<span id="22">22</span>
-<span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Library for calculating statistics on collections of numbers.
 
 </span><span class="attribute">#![warn(missing_docs)]
 #![warn(clippy::cargo)]
 #![no_std]
 
-</span><span class="kw">use </span>core::iter::Sum;
-
-<span class="kw">use </span>num_traits::{FromPrimitive, Num};
-
-<span class="kw">mod </span>error;
+</span><span class="kw">mod </span>error;
 <span class="kw">mod </span>freq;
+<span class="kw">mod </span>helpers;
 <span class="kw">mod </span>stats;
-
-<span class="doccomment">/// Trait for a number-like type that we can calculate statistics on.
-</span><span class="kw">pub trait </span>NumExt: Num + FromPrimitive + Copy + Sum {}
-<span class="kw">impl</span>&lt;T&gt; NumExt <span class="kw">for </span>T <span class="kw">where </span>T: Num + FromPrimitive + Copy + Sum {}
 
 <span class="kw">pub use </span><span class="kw">crate</span>::error::StatsError;
 <span class="kw">pub use </span><span class="kw">crate</span>::freq::FrequencyStats;
