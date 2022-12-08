@@ -115,7 +115,33 @@
 <span id="115">115</span>
 <span id="116">116</span>
 <span id="117">117</span>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::error::DataType;
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+</pre><pre class="rust"><code><span class="kw">use </span>num_traits::ToPrimitive;
+
+<span class="kw">use </span><span class="kw">crate</span>::error::DataType;
 <span class="kw">use </span><span class="kw">crate</span>::NumExt;
 <span class="kw">use </span><span class="kw">crate</span>::Result;
 <span class="kw">use </span><span class="kw">crate</span>::StatsError;
@@ -223,6 +249,28 @@
                     })<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(sum / <span class="self">self</span>.non_zero_count_into_item()<span class="question-mark">?</span>)
+    }
+
+    <span class="doccomment">/// Calculate the standard deviation of the collection.
+    ///
+    /// See [`crate::Stats::std_dev`]
+    </span><span class="kw">fn </span>std_dev(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+    <span class="kw">where
+        </span>T: ToPrimitive,
+    {
+        T::from_f64(
+            <span class="self">self</span>.variance()<span class="question-mark">?
+                </span>.to_f64()
+                .ok_or(StatsError::CouldNotConvert {
+                    from: DataType::Item,
+                    to: DataType::F64,
+                })<span class="question-mark">?
+                </span>.sqrt(),
+        )
+        .ok_or(StatsError::CouldNotConvert {
+            from: DataType::F64,
+            to: DataType::Item,
+        })
     }
 }
 

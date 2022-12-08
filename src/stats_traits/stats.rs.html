@@ -237,6 +237,7 @@
 <span id="237">237</span>
 <span id="238">238</span>
 <span id="239">239</span>
+<span id="240">240</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::{FromPrimitive, ToPrimitive};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::DataType;
@@ -358,8 +359,9 @@
 
     <span class="doccomment">/// Find the standard deviation of the collection.
     /// The standard deviation is the square root of the variance.
-    /// The standard deviation is a measure of how spread out the items are.
-    /// It is the square root of the average of the squared differences from the mean.
+    /// It is a measure of how spread out the items are.
+    ///
+    /// [Wikipedia](&lt;https://en.wikipedia.org/wiki/Standard_deviation&gt;)
     ///
     /// # Examples
     /// ```
