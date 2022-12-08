@@ -119,8 +119,9 @@ where
 
     /// Find the standard deviation of the collection.
     /// The standard deviation is the square root of the variance.
-    /// The standard deviation is a measure of how spread out the items are.
-    /// It is the square root of the average of the squared differences from the mean.
+    /// It is a measure of how spread out the items are.
+    ///
+    /// [Wikipedia](<https://en.wikipedia.org/wiki/Standard_deviation>)
     ///
     /// # Examples
     /// ```

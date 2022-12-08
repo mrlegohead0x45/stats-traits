@@ -13,4 +13,3 @@ num-traits = "0.2.15"
 
 [dev-dependencies]
 approx = "0.5.1"
-cargo-tarpaulin = "0.23.1"

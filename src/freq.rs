@@ -1,3 +1,5 @@
+use num_traits::ToPrimitive;
+
 use crate::error::DataType;
 use crate::NumExt;
 use crate::Result;
@@ -106,6 +108,28 @@ where
                     })?;
         }
         Ok(sum / self.non_zero_count_into_item()?)
+    }
+
+    /// Calculate the standard deviation of the collection.
+    ///
+    /// See [`crate::Stats::std_dev`]
+    fn std_dev(&self) -> Result<T>
+    where
+        T: ToPrimitive,
+    {
+        T::from_f64(
+            self.variance()?
+                .to_f64()
+                .ok_or(StatsError::CouldNotConvert {
+                    from: DataType::Item,
+                    to: DataType::F64,
+                })?
+                .sqrt(),
+        )
+        .ok_or(StatsError::CouldNotConvert {
+            from: DataType::F64,
+            to: DataType::Item,
+        })
     }
 }
 
