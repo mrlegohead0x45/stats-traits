@@ -142,7 +142,6 @@ where
             .into_iter()
             .map(|(_, val)| val)
             .reduce(T::min)
-            // .map_or_else(|| Err(StatsError::EmptyCollection), |(_, val)| Ok(val))
             .ok_or(StatsError::EmptyCollection)
     }
 
@@ -155,7 +154,6 @@ where
             .into_iter()
             .map(|(_, val)| val)
             .reduce(T::max)
-            // .map_or_else(|| Err(StatsError::EmptyCollection), |(_, val)| Ok(val))
             .ok_or(StatsError::EmptyCollection)
     }
 
@@ -166,6 +164,28 @@ where
         T: MinMax,
     {
         Ok(self.max()? - self.min()?)
+    }
+
+    /// Return the most frequently occurring value in the collection,
+    /// which is the one with the highest frequency
+    fn mode(&self) -> Result<T> {
+        /*
+            tried the following
+            self
+                .clone()
+                .into_iter()
+                .max_by_key(|(freq, _)| freq) <- complains about lifetimes
+                .map(|(_, val)| val)
+                .ok_or(StatsError::EmptyCollection)
+        */
+        let mut mode = (0, T::zero());
+        self.non_zero_count()?;
+        for (freq, val) in self.clone() {
+            if freq >= mode.0 {
+                mode = (freq, val);
+            }
+        }
+        Ok(mode.1)
     }
 }
 
