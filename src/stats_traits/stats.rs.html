@@ -270,6 +270,34 @@
 <span id="270">270</span>
 <span id="271">271</span>
 <span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
 </pre><pre class="rust"><code><span class="kw">use </span>num_traits::{FromPrimitive, ToPrimitive};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::DataType;
@@ -448,6 +476,7 @@
 
     <span class="doccomment">/// Return the range of the collection
     /// (the smallest subtracted from the largest)
+    </span><span class="attribute">#[inline]
     </span><span class="kw">fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Item&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Item: MinMax,
@@ -482,7 +511,7 @@
         <span class="macro">assert_eq!</span>(v.sum(), <span class="number">6</span>);
 
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.sum(), <span class="number">6.0</span>);
+        <span class="macro">assert_relative_eq!</span>(v.sum(), <span class="number">6.0</span>);
     }
 
     <span class="attribute">#[test]
@@ -497,7 +526,7 @@
         <span class="macro">assert_eq!</span>(v.mean(), <span class="prelude-val">Ok</span>(<span class="number">2</span>));
 
         <span class="kw">let </span>v: Vec&lt;f64&gt; = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.mean(), <span class="prelude-val">Ok</span>(<span class="number">2.0</span>));
+        <span class="macro">assert_relative_eq!</span>(v.mean().unwrap(), <span class="number">2.0</span>);
 
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];
         <span class="macro">assert_eq!</span>(v.mean(), <span class="prelude-val">Ok</span>(<span class="number">2</span>));
@@ -506,7 +535,7 @@
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_variance_vec() {
         <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
-        <span class="macro">assert_eq!</span>(v.variance(), <span class="prelude-val">Ok</span>(<span class="number">2.0 </span>/ <span class="number">3.0</span>));
+        <span class="macro">assert_relative_eq!</span>(v.variance().unwrap(), <span class="number">2.0 </span>/ <span class="number">3.0</span>);
     }
 
     <span class="attribute">#[test]
@@ -540,6 +569,33 @@
             Vec::&lt;i32&gt;::new().std_dev(),
             <span class="prelude-val">Err</span>(StatsError::EmptyCollection)
         )
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_min_vec() {
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+        <span class="macro">assert_eq!</span>(&lt;Vec&lt;i32&gt; <span class="kw">as </span>Stats&gt;::min(<span class="kw-2">&amp;</span>v), <span class="prelude-val">Ok</span>(<span class="number">1</span>));
+
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
+        <span class="macro">assert_eq!</span>(v.min(), <span class="prelude-val">Ok</span>(<span class="number">1.0</span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_max_vec() {
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+        <span class="macro">assert_eq!</span>(&lt;Vec&lt;i32&gt; <span class="kw">as </span>Stats&gt;::max(<span class="kw-2">&amp;</span>v), <span class="prelude-val">Ok</span>(<span class="number">3</span>));
+
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
+        <span class="macro">assert_eq!</span>(v.max(), <span class="prelude-val">Ok</span>(<span class="number">3.0</span>));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_range_vec() {
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+        <span class="macro">assert_eq!</span>(&lt;Vec&lt;i32&gt; <span class="kw">as </span>Stats&gt;::range(<span class="kw-2">&amp;</span>v), <span class="prelude-val">Ok</span>(<span class="number">2</span>));
+
+        <span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>];
+        <span class="macro">assert_eq!</span>(v.range(), <span class="prelude-val">Ok</span>(<span class="number">2.0</span>));
     }
 }
 </code></pre></div>

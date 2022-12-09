@@ -71,6 +71,16 @@
 <span id="71">71</span>
 <span id="72">72</span>
 <span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::iter::Sum;
 
 <span class="kw">use </span>num_traits::{FromPrimitive, Num};
@@ -142,6 +152,16 @@
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_max_f32_nan() {
         <span class="macro">assert_eq!</span>(&lt;f32 <span class="kw">as </span>MinMax&gt;::max(<span class="number">1.0</span>, f32::NAN), <span class="number">1.0</span>);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_min_i32() {
+        <span class="macro">assert_eq!</span>(&lt;i32 <span class="kw">as </span>MinMax&gt;::min(<span class="number">0</span>, <span class="number">1</span>), <span class="number">0</span>);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_max_i32() {
+        <span class="macro">assert_eq!</span>(&lt;i32 <span class="kw">as </span>MinMax&gt;::max(<span class="number">0</span>, <span class="number">1</span>), <span class="number">1</span>);
     }
 }
 </code></pre></div>
