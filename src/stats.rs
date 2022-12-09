@@ -176,6 +176,7 @@ where
 
     /// Return the range of the collection
     /// (the smallest subtracted from the largest)
+    #[inline]
     fn range(&self) -> Result<Self::Item>
     where
         Self::Item: MinMax,
@@ -210,7 +211,7 @@ mod tests {
         assert_eq!(v.sum(), 6);
 
         let v = vec![1.0, 2.0, 3.0];
-        assert_eq!(v.sum(), 6.0);
+        assert_relative_eq!(v.sum(), 6.0);
     }
 
     #[test]
@@ -225,7 +226,7 @@ mod tests {
         assert_eq!(v.mean(), Ok(2));
 
         let v: Vec<f64> = vec![1.0, 2.0, 3.0];
-        assert_eq!(v.mean(), Ok(2.0));
+        assert_relative_eq!(v.mean().unwrap(), 2.0);
 
         let v = vec![1, 2, 3, 4];
         assert_eq!(v.mean(), Ok(2));
@@ -234,7 +235,7 @@ mod tests {
     #[test]
     fn test_variance_vec() {
         let v = vec![1.0, 2.0, 3.0];
-        assert_eq!(v.variance(), Ok(2.0 / 3.0));
+        assert_relative_eq!(v.variance().unwrap(), 2.0 / 3.0);
     }
 
     #[test]
@@ -268,5 +269,32 @@ mod tests {
             Vec::<i32>::new().std_dev(),
             Err(StatsError::EmptyCollection)
         )
+    }
+
+    #[test]
+    fn test_min_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(<Vec<i32> as Stats>::min(&v), Ok(1));
+
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.min(), Ok(1.0));
+    }
+
+    #[test]
+    fn test_max_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(<Vec<i32> as Stats>::max(&v), Ok(3));
+
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.max(), Ok(3.0));
+    }
+
+    #[test]
+    fn test_range_vec() {
+        let v = vec![1, 2, 3];
+        assert_eq!(<Vec<i32> as Stats>::range(&v), Ok(2));
+
+        let v = vec![1.0, 2.0, 3.0];
+        assert_eq!(v.range(), Ok(2.0));
     }
 }

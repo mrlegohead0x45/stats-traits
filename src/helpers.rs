@@ -70,4 +70,14 @@ mod tests {
     fn test_max_f32_nan() {
         assert_eq!(<f32 as MinMax>::max(1.0, f32::NAN), 1.0);
     }
+
+    #[test]
+    fn test_min_i32() {
+        assert_eq!(<i32 as MinMax>::min(0, 1), 0);
+    }
+
+    #[test]
+    fn test_max_i32() {
+        assert_eq!(<i32 as MinMax>::max(0, 1), 1);
+    }
 }

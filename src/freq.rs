@@ -159,6 +159,7 @@ where
 
     /// Return the range of the collection
     /// (the largest - the smallest)
+    #[inline]
     fn range(&self) -> Result<T>
     where
         T: MinMax,
@@ -194,4 +195,51 @@ where
     I: IntoIterator<Item = Frequency<T>> + Clone,
     T: NumExt,
 {
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    extern crate std;
+    use std::prelude::rust_2021::*;
+    use std::vec;
+
+    use approx::assert_relative_eq;
+
+    #[test]
+    fn test_non_zero_count() {
+        let vec: Vec<(usize, i32)> = vec![(1, 1), (2, 2)];
+        assert_eq!(vec.non_zero_count(), Ok(3));
+    }
+
+    #[test]
+    fn test_sum() {
+        let vec: Vec<(usize, i32)> = vec![(1, 1), (2, 2)];
+        assert_eq!(vec.sum(), Ok(5));
+    }
+
+    #[test]
+    fn test_mean() {
+        let vec: Vec<(usize, i32)> = vec![(1, 1), (2, 2)];
+        assert_eq!(vec.mean(), Ok(1));
+
+        let vec: Vec<(usize, f32)> = vec![(1, 1.0), (2, 2.0)];
+        assert_relative_eq!(vec.mean().unwrap(), 5.0 / 3.0);
+    }
+
+    #[test]
+    fn test_variance() {
+        let vec: Vec<(usize, i32)> = vec![(1, 1), (2, 2)];
+        assert_eq!(vec.variance(), Ok(0));
+
+        let vec: Vec<(usize, f32)> = vec![(1, 1.0), (2, 2.0)];
+        assert_relative_eq!(vec.variance().unwrap(), 2.0 / 9.0);
+    }
+
+    #[test]
+    fn test_std_dev() {
+        let vec: Vec<(usize, i32)> = vec![(1, 1), (2, 2)];
+        assert_eq!(vec.std_dev(), Ok(0));
+    }
 }
