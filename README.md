@@ -2,7 +2,7 @@
 
 ![Lines of code](https://img.shields.io/tokei/lines/github/mrlegohead0x45/stats-traits)
 ![MIT License](https://img.shields.io/github/license/mrlegohead0x45/stats-traits)
-![Tests Status](https://img.shields.io/github/workflow/status/mrlegohead0x45/stats-traits/build-test)
+![Tests Status](https://img.shields.io/github/actions/workflow/status/mrlegohead0x45/stats-traits/test.yaml?branch=main)
 ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/mrlegohead0x45/stats-traits)
 
 stats is a Rust statistics library
